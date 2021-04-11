@@ -68,4 +68,4 @@ class blooms(bytearray):
         return blooms([s | o for (s, o) in zip(self, other)])
 
 if __name__ == "__main__":
-    doctest.testmod()
+    doctest.testmod() # pragma: no cover
