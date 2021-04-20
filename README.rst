@@ -4,11 +4,14 @@ blooms
 
 Lightweight Bloom filter data structure derived from the built-in bytearray type.
 
-|pypi|
+|pypi| |travis|
 
 .. |pypi| image:: https://badge.fury.io/py/blooms.svg
    :target: https://badge.fury.io/py/blooms
    :alt: PyPI version and link.
+
+.. |travis| image:: https://travis-ci.com/nthparty/blooms.svg?branch=main
+   :target: https://travis-ci.com/nthparty/blooms
 
 Package Installation and Usage
 ------------------------------
