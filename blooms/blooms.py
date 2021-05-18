@@ -5,23 +5,31 @@ built-in bytearray type.
 """
 
 from __future__ import annotations
+from typing import Union
+from collections.abc import Iterator
 import doctest
 
 class blooms(bytearray):
     """
     Bloom filter data structure.
     """
-    def __imatmul__(self: blooms, bs: bytes) -> blooms:
+    def __imatmul__(self: blooms, argument: Union[bytes, Iterator]) -> blooms:
         """
         Insert a bytes-like object into this instance.
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
         """
-        for i in range(0, len(bs), 4):
-            index = int.from_bytes(bs[i:i + 4], 'little')
-            (index_byte, index_bit) = (index // 8, index % 8)
-            self[index_byte % len(self)] |= 2**index_bit
+        if not isinstance(argument, (bytes, bytearray, Iterator)):
+            raise TypeError('supplied argument is not a bytes-like object and not iterable')
+
+        bss = [argument] if isinstance(argument, (bytes, bytearray)) else iter(argument)
+        for bs in bss:
+            for i in range(0, len(bs), 4):
+                index = int.from_bytes(bs[i:i + 4], 'little')
+                (index_byte, index_bit) = (index // 8, index % 8)
+                self[index_byte % len(self)] |= 2**index_bit
+
         return self
 
     def __rmatmul__(self: blooms, bs: bytes) -> bool:
