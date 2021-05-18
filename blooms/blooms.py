@@ -19,6 +19,13 @@ class blooms(bytearray):
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
+        >>> b = blooms(100)
+        >>> b @= (bytes([i, i + 1, i + 2]) for i in range(10))
+        >>> b = blooms(100)
+        >>> b @= 123
+        Traceback (most recent call last):
+          ...
+        TypeError: supplied argument is not a bytes-like object and not iterable
         """
         if not isinstance(argument, (bytes, bytearray, Iterator)):
             raise TypeError('supplied argument is not a bytes-like object and not iterable')
