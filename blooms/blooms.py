@@ -7,7 +7,7 @@ built-in bytearray type.
 from __future__ import annotations
 from typing import Union
 import doctest
-from collections.abc import Iterator
+from collections.abc import Iterable
 import base64
 
 class blooms(bytearray):
@@ -41,7 +41,7 @@ class blooms(bytearray):
         """
         return base64.standard_b64encode(self).decode('utf-8')
 
-    def __imatmul__(self: blooms, argument: Union[bytes, Iterator]) -> blooms:
+    def __imatmul__(self: blooms, argument: Union[bytes, Iterable]) -> blooms:
         """
         Insert a bytes-like object into this instance.
 
@@ -55,7 +55,7 @@ class blooms(bytearray):
           ...
         TypeError: supplied argument is not a bytes-like object and not iterable
         """
-        if not isinstance(argument, (bytes, bytearray, Iterator)):
+        if not isinstance(argument, (bytes, bytearray, Iterable)):
             raise TypeError('supplied argument is not a bytes-like object and not iterable')
 
         bss = [argument] if isinstance(argument, (bytes, bytearray)) else iter(argument)
