@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name="blooms",
-    version="0.2.0",
+    version="0.3.0",
     packages=["blooms",],
     install_requires=[],
     license="MIT",

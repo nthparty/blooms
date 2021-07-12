@@ -6,13 +6,41 @@ built-in bytearray type.
 
 from __future__ import annotations
 from typing import Union
-from collections.abc import Iterator
 import doctest
+from collections.abc import Iterator
+import base64
 
 class blooms(bytearray):
     """
     Bloom filter data structure.
     """
+    @classmethod
+    def from_base64(cls, s: str) -> blooms:
+        """
+        Convert a Base64 UTF-8 string representation into a blooms instance.
+
+        >>> b = blooms(100)
+        >>> b @= bytes([1, 2, 3])
+        >>> b = blooms.from_base64(b.to_base64())
+        >>> bytes([1, 2, 3]) @ b
+        True
+        >>> bytes([4, 5, 6]) @ b
+        False
+        """
+        ba = bytearray.__new__(cls)
+        ba.extend(base64.standard_b64decode(s))
+        return ba
+
+    def to_base64(self: blooms) -> str:
+        """
+        Convert to Base64 UTF-8 string representation.
+
+        >>> b = blooms(100)
+        >>> isinstance(b.to_base64(), str)
+        True
+        """
+        return base64.standard_b64encode(self).decode('utf-8')
+
     def __imatmul__(self: blooms, argument: Union[bytes, Iterator]) -> blooms:
         """
         Insert a bytes-like object into this instance.
@@ -56,7 +84,6 @@ class blooms(bytearray):
             if ((self[index_byte % len(self)] >> index_bit) % 2) != 1:
                 return False
         return True
-
 
     def __or__(self: blooms, other: blooms) -> blooms:
         """
