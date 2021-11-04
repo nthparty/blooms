@@ -1,5 +1,4 @@
-"""Bloom filter data structure.
-
+"""
 Lightweight Bloom filter data structure derived from the
 built-in bytearray type.
 """
@@ -17,7 +16,7 @@ class blooms(bytearray):
     @classmethod
     def from_base64(cls, s: str) -> blooms:
         """
-        Convert a Base64 UTF-8 string representation into a blooms instance.
+        Convert a Base64 UTF-8 string representation into an instance.
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
@@ -33,7 +32,7 @@ class blooms(bytearray):
 
     def to_base64(self: blooms) -> str:
         """
-        Convert to Base64 UTF-8 string representation.
+        Convert this instance to a Base64 UTF-8 string representation.
 
         >>> b = blooms(100)
         >>> isinstance(b.to_base64(), str)
@@ -41,9 +40,10 @@ class blooms(bytearray):
         """
         return base64.standard_b64encode(self).decode('utf-8')
 
-    def __imatmul__(self: blooms, argument: Union[bytes, Iterable]) -> blooms:
+    def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
         """
-        Insert a bytes-like object into this instance.
+        Insert a bytes-like object (or an iterable of bytes-like objects)
+        into this instance.
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
@@ -56,7 +56,9 @@ class blooms(bytearray):
         TypeError: supplied argument is not a bytes-like object and not iterable
         """
         if not isinstance(argument, (bytes, bytearray, Iterable)):
-            raise TypeError('supplied argument is not a bytes-like object and not iterable')
+            raise TypeError(
+                'supplied argument is not a bytes-like object and not iterable'
+            )
 
         bss = [argument] if isinstance(argument, (bytes, bytearray)) else iter(argument)
         for bs in bss:
@@ -67,7 +69,7 @@ class blooms(bytearray):
 
         return self
 
-    def __rmatmul__(self: blooms, bs: bytes) -> bool:
+    def __rmatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> bool:
         """
         Check whether a bytes-like object appears in this instance.
 
@@ -78,8 +80,8 @@ class blooms(bytearray):
         >>> bytes([4, 5, 6]) @ b
         False
         """
-        for i in range(0, len(bs), 4):
-            index = int.from_bytes(bs[i:i + 4], 'little')
+        for i in range(0, len(argument), 4):
+            index = int.from_bytes(argument[i:i + 4], 'little')
             (index_byte, index_bit) = (index // 8, index % 8)
             if ((self[index_byte % len(self)] >> index_bit) % 2) != 1:
                 return False
@@ -87,7 +89,7 @@ class blooms(bytearray):
 
     def __or__(self: blooms, other: blooms) -> blooms:
         """
-        Take the union of two instances.
+        Take the union of this instance and another instance.
 
         >>> b0 = blooms(100)
         >>> b0 @= bytes([1, 2, 3])
@@ -108,6 +110,29 @@ class blooms(bytearray):
             raise ValueError('instances do not have equivalent lengths')
 
         return blooms([s | o for (s, o) in zip(self, other)])
+
+    def issubset(self: blooms, other: blooms) -> bool:
+        """
+        Determine whether this instance represents a subset of
+        another instance.
+
+        >>> b0 = blooms([0, 0, 1])
+        >>> b1 = blooms([0, 0, 3])
+        >>> b0.issubset(b1)
+        True
+        >>> b1.issubset(b0)
+        False
+        >>> b0 = blooms(100)
+        >>> b1 = blooms(200)
+        >>> b0.issubset(b1)
+        Traceback (most recent call last):
+          ...
+        ValueError: instances do not have equivalent lengths
+        """
+        if len(self) != len(other):
+            raise ValueError('instances do not have equivalent lengths')
+
+        return all(x <= y for (x, y) in zip(self, other))
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover
