@@ -4,7 +4,7 @@ blooms
 
 Lightweight Bloom filter data structure derived from the built-in bytearray type.
 
-|pypi| |readthedocs| |travis| |coveralls|
+|pypi| |readthedocs| |actions| |coveralls|
 
 .. |pypi| image:: https://badge.fury.io/py/blooms.svg
    :target: https://badge.fury.io/py/blooms
@@ -14,9 +14,9 @@ Lightweight Bloom filter data structure derived from the built-in bytearray type
    :target: https://blooms.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
 
-.. |travis| image:: https://app.travis-ci.com/nthparty/blooms.svg?branch=main
-   :target: https://app.travis-ci.com/nthparty/blooms
-   :alt: Travis CI build status.
+.. |actions| image:: https://github.com/nthparty/blooms/workflows/lint-test-cover-docs/badge.svg
+   :target: https://github.com/nthparty/blooms/actions/workflows/lint-test-cover-docs.yml
+   :alt: GitHub Actions status.
 
 .. |coveralls| image:: https://coveralls.io/repos/github/nthparty/blooms/badge.svg?branch=main
    :target: https://coveralls.io/github/nthparty/blooms?branch=main
