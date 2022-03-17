@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 # The lines below can be parsed by `docs/conf.py`.
 name = "blooms"
-version = "1.0.0"
+version = "1.1.0"
 
 setup(
     name=name,
@@ -20,6 +20,4 @@ setup(
                 "from the built-in bytearray type.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    test_suite="nose.collector",
-    tests_require=["nose"],
 )
