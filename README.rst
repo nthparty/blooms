@@ -54,7 +54,7 @@ It is the responsibility of the user of the library to hash and truncate the byt
     >>> b.hex()
     '00000004'
 
-When testing whether a bytes-like object is a member of an instance, the same hashing and truncation operations should be applied.
+When testing whether a bytes-like object is a member of an instance, the same hashing and truncation operations should be applied::
 
     >>> sha256('abc'.encode()).digest()[:2] @ b
     True

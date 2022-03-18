@@ -1,6 +1,6 @@
 """
 Lightweight Bloom filter data structure derived from the
-built-in ``bytearray`` type.
+built-in :class:`bytearray <bytearray>` type.
 """
 
 from __future__ import annotations
@@ -11,7 +11,38 @@ import base64
 
 class blooms(bytearray):
     """
-    Bloom filter data structure.
+    Bloom filter data structure with support for common operations such as
+    insertion (:obj:`blooms.__imatmul__`), membership (:obj:`blooms.__rmatmul__`),
+    union (:obj:`blooms.__or__`), and containment (:obj:`blooms.issubset`).
+
+    >>> b = blooms(4)
+
+    It is the responsibility of the user of the library to hash and truncate
+    the bytes-like object being inserted so that only those bytes that
+    contribute to the object's membership are considered.
+
+    >>> from hashlib import sha256
+    >>> x = 'abc' # Value to insert.
+    >>> h = sha256(x.encode()).digest() # Hash of value.
+    >>> t = h[:2] # Truncated hash.
+    >>> b @= t # Insert the value into the Bloom filter.
+    >>> b.hex()
+    '00000004'
+
+    When testing whether a bytes-like object is a member of an instance,
+    the same hashing and truncation operations should be applied.
+
+    >>> sha256('abc'.encode()).digest()[:2] @ b
+    True
+    >>> sha256('xyz'.encode()).digest()[:2] @ b
+    False
+
+    A particular sequence of a hashing operation followed by a truncation operation
+    can be encapsulated within a user-defined class derived from the :obj:`blooms`
+    class, wherein the default insertion method :obj:`blooms.__imatmul__` and
+    membership method :obj:`blooms.__rmatmul__` are overloaded. The static method
+    :obj:`blooms.specialize` makes it possible to define such a derived class concisely
+    (without resorting to Python's class definition syntax).
     """
     def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
         """
