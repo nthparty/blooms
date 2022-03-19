@@ -43,6 +43,20 @@ class blooms(bytearray):
     membership method :obj:`blooms.__rmatmul__` are overloaded. The static method
     :obj:`blooms.specialize` makes it possible to define such a derived class concisely
     (without resorting to Python's class definition syntax).
+
+    For a given :obj:`blooms` instance, the :obj:`blooms.saturation` method returns a
+    :class:`float <float>` value between ``0.0`` and ``1.0`` that is influenced by the
+    number of bytes-like objects that have been inserted so far into that instance.
+    This value represents an upper bound on the rate with which false positives will
+    occur when testing bytes-like objects (of the specified length) for membership
+    within the instance.
+
+	>>> b = blooms(32)
+	>>> from secrets import token_bytes
+	>>> for _ in range(8):
+	...     b @= token_bytes(4)
+	>>> b.saturation(4)
+	0.03125
     """
     def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
         """
@@ -175,6 +189,51 @@ class blooms(bytearray):
         True
         """
         return base64.standard_b64encode(self).decode('utf-8')
+
+    def saturation(self: blooms, length: int) -> float:
+        """
+        Return the approximate saturation of this instance as a value between
+        ``0.0`` and ``1.0`` (assuming that all bytes-like objects that have been
+        or will be inserted have the specified length). The approximation is an
+        upper bound on the true saturation, and its accuracy degrades as the
+        number of insertions approaches the value ``len(self) // 8``.
+
+        >>> b = blooms(32)
+        >>> b.saturation(4)
+        0.0
+        >>> from secrets import token_bytes
+        >>> for _ in range(8):
+        ...     b @= token_bytes(4)
+        >>> b.saturation(4) < 0.1
+        True
+
+        The saturation of an instance can be interpreted as an upper bound on
+        the rate at which false positives can be expected when querying the
+        instance with bytes-like objects that have the specified length.
+        """
+        (exp_div, exp_mod) = ((length // 4), (1 if length % 4 > 0 else 0))
+
+        # The numerator represents an upper bound on the number of insertions
+        # that may have occurred to obtain the bit pattern in this instance.
+        numerator = sum([bin(b).count("1") for b in self]) ** (exp_div + exp_mod)
+
+        # The denominator represents the total number of possible combinations
+        # of bits that can be set to ``1`` when an insertion occurs.
+        denominator = (
+            # Each bit obtained from the bytes-like object being inserted
+            # can appear in any of the bit positions within this instance.
+            ((8 * len(self)) ** exp_div) \
+            * \
+            # Include additional factor in case there are bytes that do not
+            # form a complete 32-bit integer, but still contribute another bit
+            # when performing an insertion. Using the ``min`` operator, we
+            # compensate for cases in which the length of this instance also
+            # is larger than the range of possible positions for this bit that
+            # can be derived from the right-most ``length % 4`` bytes.
+            (min(8 * len(self), max(256, len(self) ** 2) * (length % 4)) ** exp_mod)
+        )
+
+        return numerator / denominator
 
     @staticmethod
     def specialize(name: str, encode: Callable) -> type:

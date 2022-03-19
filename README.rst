@@ -87,6 +87,15 @@ It is also possible to check whether the members of one Bloom filter are a subse
     >>> b.issubset(d)
     True
 
+A method is provided for determining the saturation of a Bloom filter. The saturation is a ``float`` value (between ``0.0`` and ``1.0``) that represents an upper bound on the rate with which false positives will occur when testing bytes-like objects (of a specific length) for membership within the Bloom filter::
+
+	>>> b = blooms(32)
+	>>> from secrets import token_bytes
+	>>> for _ in range(8):
+	...     b @= token_bytes(4)
+	>>> b.saturation(4)
+	0.03125
+
 In addition, conversion methods to and from Base64 strings are included to support concise encoding and decoding::
 
     >>> b.to_base64()
@@ -122,14 +131,14 @@ All unit tests are executed and their coverage is measured when using `pytest <h
     python -m pip install pytest pytest-cov
     python -m pytest
 
-Alternatively, all unit tests are included in the module itself and can be executed using `doctest <https://docs.python.org/3/library/doctest.html>`_::
+The subset of the unit tests included in the module itself and can be executed using `doctest <https://docs.python.org/3/library/doctest.html>`_::
 
     python blooms/blooms.py -v
 
 Style conventions are enforced using `Pylint <https://www.pylint.org/>`_::
 
     python -m pip install pylint
-    python -m pylint blooms
+    python -m pylint blooms ./test/test_blooms.py
 
 Contributions
 -------------
