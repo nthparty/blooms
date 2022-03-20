@@ -96,6 +96,12 @@ A method is provided for determining the saturation of a Bloom filter. The satur
 	>>> b.saturation(4)
 	0.03125
 
+It is also possible to determine the approximate maximum capacity of a Bloom filter for a given saturation limit. For example, the output below indicates that a saturation of ``0.05`` will likely be reached after more than ``28`` insertions of bytes-like objects of length ``8``::
+
+	>>> b = blooms(32)
+	>>> b.capacity(8, 0.05)
+	28
+
 In addition, conversion methods to and from Base64 strings are included to support concise encoding and decoding::
 
     >>> b.to_base64()

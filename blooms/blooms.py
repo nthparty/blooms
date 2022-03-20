@@ -57,6 +57,16 @@ class blooms(bytearray):
 	...     b @= token_bytes(4)
 	>>> b.saturation(4)
 	0.03125
+
+    It is also possible to use the :obj:`blooms.capacity` method to obtain an
+    approximate maximum capacity of a :obj:`blooms` instance for a given saturation
+    limit. For example, the output below indicates that a saturation of ``0.05`` will
+    likely be reached after more than ``28`` insertions of bytes-like objects of length
+    ``8``::
+
+	>>> b = blooms(32)
+	>>> b.capacity(8, 0.05)
+	28
     """
     def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
         """
@@ -234,6 +244,40 @@ class blooms(bytearray):
         )
 
         return numerator / denominator
+
+    def capacity(self: blooms, length: int, saturation: float) -> int:
+        """
+        Return this instance's approximate capacity: the number of bytes-like
+        objects of the specified length that can be inserted into an empty version
+        of this instance before the specified saturation is likely to be reached.
+
+        >>> b = blooms(32)
+        >>> b.capacity(8, 0.05)
+        28
+        >>> b.capacity(12, 0.05)
+        31
+
+        Note that **capacity is independent of the number of insertions into this
+        instance that have occurred**. It is the responsibility of the user to keep
+        track of the number of bytes-like objects that have been inserted into an
+        instance.
+        """
+        (exp_div, exp_mod) = ((length // 4), (1 if length % 4 > 0 else 0))
+
+        # In the ``saturation`` method, we have``saturation == numerator / denominator``.
+        # It then follows that ``saturation * denominator == numerator``. It is thus
+        # sufficient to compute the numerator and then derive a worst-case capacity
+        # bound from the number of non-zero bits (as represented by the numerator).
+        denominator = (
+            ((8 * len(self)) ** exp_div) \
+            * \
+            (min(8 * len(self), max(256, len(self) ** 2) * (length % 4)) ** exp_mod)
+        )
+        return int(
+            ((saturation * denominator) ** (1 / (exp_div + exp_mod))) \
+            / \
+            ((length // 4) + exp_mod)
+        )
 
     @staticmethod
     def specialize(name: str, encode: Callable) -> type:
