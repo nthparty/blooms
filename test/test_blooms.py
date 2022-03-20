@@ -25,15 +25,15 @@ class Test_blooms_methods(TestCase):
     Container for tests of the exported class.
     """
 
-# Create an ensemble of distinct saturation test methods (within the container
-# class) for different combinations of parameters. This is done in order to
-# provide more granular progress and result feedback.
+# Create an ensemble of distinct saturation and capacity test methods (within
+# the container class) for different combinations of parameters. This is done
+# in order to provide more granular progress and result feedback.
 for blooms_length in [2 ** k for k in range(2, 21, 2)]:
     # A bytes-like object having length ``64`` represents
     # a digest from an invocation of SHA-512.
     for item_length in range(8, 64, 13):
-        # The tests for this combination of lengths are encapsulated in the
-        # method below.
+        # The saturation tests for this combination of lengths are encapsulated in the
+        # methods below.
         def method_for_saturation_test(test, blooms_len=blooms_length, item_len=item_length):
             """
             Test the accuracy of the approximations returned by the method for
@@ -73,15 +73,8 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
             method_for_saturation_test
         )
 
-# Create an ensemble of distinct capacity test methods (within the container
-# class) for different combinations of parameters. This is done in order to
-# provide more granular progress and result feedback.
-for blooms_length in [2 ** k for k in range(2, 21, 2)]:
-    # A bytes-like object having length ``64`` represents
-    # a digest from an invocation of SHA-512.
-    for item_length in range(8, 64, 13):
-        # The tests for this combination of lengths are encapsulated in the
-        # method below.
+        # The capacity tests for this combination of lengths are encapsulated in the
+        # methods below.
         def method_for_capacity_test(test, blooms_len=blooms_length, item_len=item_length):
             """
             Test the accuracy of the approximations returned by the method for
