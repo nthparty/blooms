@@ -18,6 +18,16 @@ def saturation_from_data(b: blooms, length: int) -> float:
         members += 1 if random.randbytes(length) @ b else 0
     return members / candidates
 
+def randbytes(n: int) -> bytes:
+    """
+    Get pseudorandom bytes-like object of specified size using
+    in a manner that is compatible across Python versions.
+    """
+    return \
+        random.randbytes(n) \
+        if hasattr(random, 'randbytes') else \
+        bytes(random.getrandbits(8) for _ in range(n))
+
 class Test_blooms_methods(TestCase):
     """
     Container for tests of the exported class.
