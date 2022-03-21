@@ -55,8 +55,8 @@ class blooms(bytearray):
 	>>> from secrets import token_bytes
 	>>> for _ in range(8):
 	...     b @= token_bytes(4)
-	>>> b.saturation(4)
-	0.03125
+	>>> b.saturation(4) < 0.1
+	True
 
     It is also possible to use the :obj:`blooms.capacity` method to obtain an
     approximate maximum capacity of a :obj:`blooms` instance for a given saturation
@@ -68,6 +68,42 @@ class blooms(bytearray):
 	>>> b.capacity(8, 0.05)
 	28
     """
+    def __init__(self, *args, **kwargs):
+        """
+        Create and initialize a new :obj:`blooms` instance. An instance can be of any
+        non-zero length.
+
+        >>> b = blooms(1)
+        >>> b @= bytes([0])
+        >>> bytes([0]) @ b
+        True
+        >>> bytes([1]) @ b
+        False
+
+        This method checks that the instance has a valid size before permitting its
+        creation.
+
+        >>> b = blooms()
+        Traceback (most recent call last):
+          ...
+        ValueError: instance must have an integer length greater than zero
+        >>> b = blooms(0)
+        Traceback (most recent call last):
+          ...
+        ValueError: instance must have an integer length greater than zero
+        >>> b = blooms(256**4 + 1)
+        Traceback (most recent call last):
+          ...
+        ValueError: instance length cannot exceed 4294967296
+        """
+        super().__init__(*args, **kwargs)
+
+        if len(self) == 0:
+            raise ValueError('instance must have an integer length greater than zero')
+
+        if len(self) >= 256 ** 4 + 1:
+            raise ValueError('instance length cannot exceed 4294967296')
+
     def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
         """
         Insert a bytes-like object (or an iterable of bytes-like objects)
@@ -82,6 +118,20 @@ class blooms(bytearray):
         Traceback (most recent call last):
           ...
         TypeError: supplied argument is not a bytes-like object and not iterable
+
+        A :obj:`blooms` instance never returns a false negative when queried, but
+        may return a false positive.
+
+        >>> b = blooms(1)
+        >>> b @= bytes([0])
+        >>> bytes([8]) @ b
+        True
+
+        The bytes-like object of length zero is a member of every :obj:`blooms` instance.
+
+        >>> b = blooms(1)
+        >>> bytes() @ b
+        True
         """
         if not isinstance(argument, (bytes, bytearray, Iterable)):
             raise TypeError(
@@ -221,6 +271,10 @@ class blooms(bytearray):
         the rate at which false positives can be expected when querying the
         instance with bytes-like objects that have the specified length.
         """
+        # This implementation converts into a 32-bit integer each subsequence of
+        # four bytes within a bytes-like object being inserted. Thus, each four-byte
+        # portion contributes to one bit position in an instance. The terms below
+        # capture this and are used throughout the formula for saturation.
         (exp_div, exp_mod) = ((length // 4), (1 if length % 4 > 0 else 0))
 
         # The numerator represents an upper bound on the number of insertions
@@ -245,7 +299,7 @@ class blooms(bytearray):
 
         return numerator / denominator
 
-    def capacity(self: blooms, length: int, saturation: float) -> int:
+    def capacity(self: blooms, length: int, saturation: float) -> Union[int, float]:
         """
         Return this instance's approximate capacity: the number of bytes-like
         objects of the specified length that can be inserted into an empty version
@@ -257,11 +311,28 @@ class blooms(bytearray):
         >>> b.capacity(12, 0.05)
         31
 
+        The capacity of an instance is not bounded for a saturation of ``1.0`` or
+        for bytes-like objects of length zero.
+
+        >>> b.capacity(0, 0.1)
+        inf
+        >>> b.capacity(4, 1.0)
+        inf
+
         Note that **capacity is independent of the number of insertions into this
         instance that have occurred**. It is the responsibility of the user to keep
         track of the number of bytes-like objects that have been inserted into an
         instance.
         """
+        # Special cases are handled separately, ensuring there are no outliers among
+        # the outputs (in terms of accuracy) over the range of these special cases.
+        if length == 0 or saturation >= 1.0:
+            return float('inf')
+
+        # This implementation converts into a 32-bit integer each subsequence of
+        # four bytes within a bytes-like object being inserted. Thus, each four-byte
+        # portion contributes to one bit position in an instance. The terms below
+        # capture this and are used throughout the formula for capacity.
         (exp_div, exp_mod) = ((length // 4), (1 if length % 4 > 0 else 0))
 
         # In the ``saturation`` method, we have``saturation == numerator / denominator``.

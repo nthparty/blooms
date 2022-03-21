@@ -3,6 +3,7 @@ Test suite containing functional unit tests for specific methods of
 the exported class.
 """
 from unittest import TestCase
+import itertools
 import random
 
 from blooms import blooms
@@ -25,10 +26,10 @@ class Test_blooms_methods(TestCase):
 # Create an ensemble of distinct saturation and capacity test methods (within
 # the container class) for different combinations of parameters. This is done
 # in order to provide more granular progress and result feedback.
-for blooms_length in [2 ** k for k in range(2, 21, 2)]:
+for blooms_length in [2 ** k for k in range(0, 21, 2)]:
     # A bytes-like object having length ``64`` represents
     # a digest from an invocation of SHA-512.
-    for item_length in range(8, 64, 13):
+    for item_length in itertools.chain(range(8), range(8, 64, 13)):
         # The saturation tests for this combination of lengths are encapsulated in the
         # methods below.
         def method_for_saturation_test(test, blooms_len=blooms_length, item_len=item_length):
@@ -43,7 +44,7 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
             for item_count in [
                 2**k
                 for k in range(2, blooms_len.bit_length() - 2)
-                if 2**k <  256**item_len
+                if 2**k < 256**item_len
             ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
@@ -93,7 +94,7 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
             for item_count in [
                 2**k
                 for k in range(2, blooms_len.bit_length() - 2)
-                if 2**k <  256**item_len
+                if 2**k < 256**item_len
             ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
@@ -106,7 +107,7 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
                 # The capacity method is tested only for a range of saturations that
                 # would reasonably be of interest to users.
                 saturation = b.saturation(item_len)
-                if saturation > 0.2:
+                if saturation > 0.3:
                     break
 
                 # The approximate capacity for the observed saturation (given the
