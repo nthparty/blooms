@@ -36,17 +36,22 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
             Test the accuracy of the approximations returned by the method for
             calculating the saturation of an instance.
             """
-            # The number of insertions is bounded above by ``len(instance) // 8``,
-            # based on the known limitations of Bloom filters.
-            for item_count in [2 ** k for k in range(2, blooms_len.bit_length() - 2)]:
+            # The number of insertions is bounded above by ``len(instance) // 8``, based
+            # on the known limitations of Bloom filters. Also, avoid tests in which the
+            # number of insertions exceeds the number of distinct bytes-like objects of
+            # the current length.
+            for item_count in [
+                2**k
+                for k in range(2, blooms_len.bit_length() - 2)
+                if 2**k <  256**item_len
+            ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
                 random.seed(blooms_len + item_len + item_count)
 
                 # Populate an instance with random data.
                 b = blooms(blooms_len // 8)
-                for _ in range(item_count):
-                    b @= random.randbytes(item_len)
+                b @= [random.randbytes(item_len) for _ in range(item_count)]
 
                 # If the instance at this length is close to saturation, there
                 # is no need to try larger quantities of insertions.
@@ -81,17 +86,22 @@ for blooms_length in [2 ** k for k in range(2, 21, 2)]:
             Test the accuracy of the approximations returned by the method for
             calculating the capacity of an instance.
             """
-            # The number of insertions is bounded above by ``len(instance) // 8``,
-            # based on the known limitations of Bloom filters.
-            for item_count in [2 ** k for k in range(2, blooms_len.bit_length() - 2)]:
+            # The number of insertions is bounded above by ``len(instance) // 8``, based
+            # on the known limitations of Bloom filters. Also, avoid tests in which the
+            # number of insertions exceeds the number of distinct bytes-like objects of
+            # the current length.
+            for item_count in [
+                2**k
+                for k in range(2, blooms_len.bit_length() - 2)
+                if 2**k <  256**item_len
+            ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
                 random.seed(blooms_len + item_len + item_count)
 
                 # Populate an instance with random data.
                 b = blooms(blooms_len // 8)
-                for _ in range(item_count):
-                    b @= random.randbytes(item_len)
+                b @= [random.randbytes(item_len) for _ in range(item_count)]
 
                 # The capacity method is tested only for a range of saturations that
                 # would reasonably be of interest to users.
