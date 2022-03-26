@@ -8,16 +8,6 @@ import random
 
 from blooms import blooms
 
-def saturation_from_data(b: blooms, length: int) -> float:
-    """
-    Compute the saturation of an instance into which bytes-like
-    objects of the specified length have been inserted.
-    """
-    (members, candidates) = (0, 2 ** 16)
-    for _ in (range(candidates)):
-        members += 1 if random.randbytes(length) @ b else 0
-    return members / candidates
-
 def randbytes(n: int) -> bytes:
     """
     Get pseudorandom bytes-like object of specified size using
@@ -27,6 +17,16 @@ def randbytes(n: int) -> bytes:
         random.randbytes(n) \
         if hasattr(random, 'randbytes') else \
         bytes(random.getrandbits(8) for _ in range(n))
+
+def saturation_from_data(b: blooms, length: int) -> float:
+    """
+    Compute the saturation of an instance into which bytes-like
+    objects of the specified length have been inserted.
+    """
+    (members, candidates) = (0, 2 ** 16)
+    for _ in (range(candidates)):
+        members += 1 if randbytes(length) @ b else 0
+    return members / candidates
 
 class Test_blooms_methods(TestCase):
     """
@@ -62,7 +62,7 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
 
                 # Populate an instance with random data.
                 b = blooms(blooms_len // 8)
-                b @= [random.randbytes(item_len) for _ in range(item_count)]
+                b @= [randbytes(item_len) for _ in range(item_count)]
 
                 # If the instance at this length is close to saturation, there
                 # is no need to try larger quantities of insertions.
@@ -112,7 +112,7 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
 
                 # Populate an instance with random data.
                 b = blooms(blooms_len // 8)
-                b @= [random.randbytes(item_len) for _ in range(item_count)]
+                b @= [randbytes(item_len) for _ in range(item_count)]
 
                 # The capacity method is tested only for a range of saturations that
                 # would reasonably be of interest to users.
