@@ -127,7 +127,7 @@ All installation and development dependencies are fully specified in ``pyproject
     python -m pip install .[docs,lint]
 
 Documentation
--------------
+^^^^^^^^^^^^^
 .. include:: toc.rst
 
 The documentation can be generated automatically from the source files using `Sphinx <https://www.sphinx-doc.org>`__::
@@ -137,7 +137,7 @@ The documentation can be generated automatically from the source files using `Sp
     sphinx-apidoc -f -E --templatedir=_templates -o _source .. && make html
 
 Testing and Conventions
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 All unit tests are executed and their coverage is measured when using `pytest <https://docs.pytest.org>`__ (see the ``pyproject.toml`` file for configuration details)::
 
     python -m pip install .[test]
