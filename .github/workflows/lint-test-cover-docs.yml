@@ -17,7 +17,7 @@ jobs:
           architecture: x64
       - name: Lint and test module.
         run: |
-          pip install -U .[lint,test].
+          pip install -U .[lint,test]
           python -m pylint blooms ./test/test_blooms.py # Check against linting rules.
           python -m pytest # Run tests.
       - name: Publish coverage results.
