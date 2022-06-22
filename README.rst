@@ -128,8 +128,6 @@ All installation and development dependencies are fully specified in ``pyproject
 
 Documentation
 ^^^^^^^^^^^^^
-.. include:: toc.rst
-
 The documentation can be generated automatically from the source files using `Sphinx <https://www.sphinx-doc.org>`__::
 
     python -m pip install .[docs]
