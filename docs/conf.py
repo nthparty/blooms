@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-# The name and version are retrieved from `setup.py` in the root directory.
-with open('../setup.py') as package_file:
+# The name and version are retrieved from ``pyproject.toml`` in the root directory.
+with open('../pyproject.toml') as package_file:
     package = package_file.read()
 project = package.split('name = "')[1].split('"')[0]
 version = package.split('version = "')[1].split('"')[0]
@@ -61,8 +61,10 @@ autodoc_default_options = {
 }
 autodoc_preserve_defaults = True
 
-# Allow references to classes defined in the Python documentation.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+# Allow references/links to definitions found in the Python documentation.
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None)
+}
 
 # -- Options for HTML output -------------------------------------------------
 
