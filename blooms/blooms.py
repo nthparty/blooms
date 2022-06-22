@@ -279,7 +279,7 @@ class blooms(bytearray):
 
         # The numerator represents an upper bound on the number of insertions
         # that may have occurred to obtain the bit pattern in this instance.
-        numerator = sum([bin(b).count("1") for b in self]) ** (exp_div + exp_mod)
+        numerator = sum(bin(b).count("1") for b in self) ** (exp_div + exp_mod)
 
         # The denominator represents the total number of possible combinations
         # of bits that can be set to ``1`` when an insertion occurs.
