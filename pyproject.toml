@@ -36,9 +36,11 @@ publish = [
 
 [build-system]
 requires = [
+	"build~=0.8",
     "setuptools~=62.0",
     "wheel~=0.37"
 ]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules --ignore=docs --cov=blooms --cov-report term-missing"

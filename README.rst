@@ -134,7 +134,7 @@ The documentation can be generated automatically from the source files using `Sp
 
     python -m pip install .[docs]
     cd docs
-    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py && make html
+    sphinx-apidoc -f -E --templatedir=_templates -o _source .. && make html
 
 Testing and Conventions
 -----------------------
@@ -166,10 +166,10 @@ This library can be published as a `package on PyPI <https://pypi.org/project/bl
 
     python -m pip install .[publish]
 
-Remove any old build/distribution files. Then, package the source into a distribution archive using the `wheel <https://pypi.org/project/wheel>`__ package::
+Remove any old build/distribution files and package the source into a distribution archive::
 
-    rm -rf dist *.egg-info
-    python setup.py sdist bdist_wheel
+    rm -rf build dist *.egg-info
+    python -m build --sdist --wheel .
 
 Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__ using the `twine <https://pypi.org/project/twine>`__ package::
 
