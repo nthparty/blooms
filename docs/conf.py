@@ -19,14 +19,14 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # The name and version are retrieved from ``pyproject.toml`` in the root
 # directory.
-with open('../pyproject.toml') as package_file:
-    package = package_file.read()
-project = package.split('name = "')[1].split('"')[0]
-version = package.split('version = "')[1].split('"')[0]
+import toml
+with open('../pyproject.toml') as pyproject_file:
+    pyproject_data = toml.load(pyproject_file)
+project = pyproject_data['project']['name']
+version = pyproject_data['project']['version']
 release = version
-
-author = 'Nth Party, Ltd.'
-copyright = '2021, Nth Party, Ltd' # Period omitted; precedes punctuation.
+author = pyproject_data['project']['authors'][0]['name']
+copyright = '2021, ' + author # Period omitted; precedes punctuation in HTML.
 
 
 # -- General configuration ---------------------------------------------------
