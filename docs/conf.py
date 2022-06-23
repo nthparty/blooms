@@ -17,7 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-# The name and version are retrieved from ``pyproject.toml`` in the root directory.
+# The name and version are retrieved from ``pyproject.toml`` in the root
+# directory.
 with open('../pyproject.toml') as package_file:
     package = package_file.read()
 project = package.split('name = "')[1].split('"')[0]
@@ -65,6 +66,7 @@ autodoc_preserve_defaults = True
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None)
 }
+
 
 # -- Options for HTML output -------------------------------------------------
 
