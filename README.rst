@@ -143,7 +143,7 @@ All unit tests are executed and their coverage is measured when using `pytest <h
 
 The subset of the unit tests included in the module itself and can be executed using `doctest <https://docs.python.org/3/library/doctest.html>`__::
 
-    python blooms/blooms.py -v
+    python src/blooms/blooms.py -v
 
 Style conventions are enforced using `Pylint <https://www.pylint.org>`__::
 
