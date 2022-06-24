@@ -1,8 +1,7 @@
 """
-Lightweight Bloom filter data structure derived from the
-built-in :class:`bytearray <bytearray>` type.
+Lightweight Bloom filter data structure derived from the built-in
+:obj:`bytearray` type.
 """
-
 from __future__ import annotations
 from typing import Union, Callable
 import doctest
@@ -12,14 +11,15 @@ import base64
 class blooms(bytearray):
     """
     Bloom filter data structure with support for common operations such as
-    insertion (:obj:`blooms.__imatmul__`), membership (:obj:`blooms.__rmatmul__`),
-    union (:obj:`blooms.__or__`), and containment (:obj:`blooms.issubset`).
+    insertion (using :obj:`~blooms.__imatmul__`), membership (using
+    :obj:`~blooms.__rmatmul__`), union (using :obj:`~blooms.__or__`), and
+    containment (using :obj:`~blooms.issubset`).
 
     >>> b = blooms(4)
 
     It is the responsibility of the user of the library to hash and truncate
-    the bytes-like object being inserted so that only those bytes that
-    contribute to the object's membership are considered.
+    the bytes-like object being inserted. Only those bytes that remain after
+    truncation contribute to the object's membership within the instance.
 
     >>> from hashlib import sha256
     >>> x = 'abc' # Value to insert.
@@ -39,12 +39,12 @@ class blooms(bytearray):
 
     A particular sequence of a hashing operation followed by a truncation operation
     can be encapsulated within a user-defined class derived from the :obj:`blooms`
-    class, wherein the default insertion method :obj:`blooms.__imatmul__` and
-    membership method :obj:`blooms.__rmatmul__` are overloaded. The static method
-    :obj:`blooms.specialize` makes it possible to define such a derived class concisely
+    class, wherein the default insertion method :obj:`~blooms.__imatmul__` and
+    membership method :obj:`~blooms.__rmatmul__` are overloaded. The static method
+    :obj:`~blooms.specialize` makes it possible to define such a derived class concisely
     (without resorting to Python's class definition syntax).
 
-    For a given :obj:`blooms` instance, the :obj:`blooms.saturation` method returns a
+    For a given :obj:`blooms` instance, the :obj:`~blooms.saturation` method returns a
     :class:`float <float>` value between ``0.0`` and ``1.0`` that is influenced by the
     number of bytes-like objects that have been inserted so far into that instance.
     This value represents an upper bound on the rate with which false positives will
@@ -58,7 +58,7 @@ class blooms(bytearray):
 	>>> b.saturation(4) < 0.1
 	True
 
-    It is also possible to use the :obj:`blooms.capacity` method to obtain an
+    It is also possible to use the :obj:`~blooms.capacity` method to obtain an
     approximate maximum capacity of a :obj:`blooms` instance for a given saturation
     limit. For example, the output below indicates that a saturation of ``0.05`` will
     likely be reached after more than ``28`` insertions of bytes-like objects of length
@@ -290,7 +290,7 @@ class blooms(bytearray):
             * \
             # Include additional factor in case there are bytes that do not
             # form a complete 32-bit integer, but still contribute another bit
-            # when performing an insertion. Using the ``min`` operator, we
+            # when performing an insertion. Using the :obj:`min` operator, we
             # compensate for cases in which the length of this instance also
             # is larger than the range of possible positions for this bit that
             # can be derived from the right-most ``length % 4`` bytes.
@@ -335,10 +335,11 @@ class blooms(bytearray):
         # capture this and are used throughout the formula for capacity.
         (exp_div, exp_mod) = ((length // 4), (1 if length % 4 > 0 else 0))
 
-        # In the ``saturation`` method, we have``saturation == numerator / denominator``.
-        # It then follows that ``saturation * denominator == numerator``. It is thus
-        # sufficient to compute the numerator and then derive a worst-case capacity
-        # bound from the number of non-zero bits (as represented by the numerator).
+        # In the :obj:`saturation` method, we have that
+        # ``saturation == numerator / denominator``. It then follows that
+        # ``saturation * denominator == numerator``. It is thus sufficient to compute
+        # the numerator and then derive a worst-case capacity bound from the number
+        # of non-zero bits (as represented by the numerator).
         denominator = (
             ((8 * len(self)) ** exp_div) \
             * \

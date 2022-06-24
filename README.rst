@@ -24,7 +24,11 @@ Lightweight Bloom filter data structure derived from the built-in bytearray type
 
 Purpose
 -------
-This library provides a simple and lightweight data structure for representing `Bloom filters <https://en.wikipedia.org/wiki/Bloom_filter>`__ that is derived from the built-in `bytearray <https://docs.python.org/3/library/stdtypes.html#bytearray>`__ type. The data structure has methods for the insertion, membership, union, and subset operations. In addition, methods for converting to and from Base64 strings are included.
+
+.. |bytearray| replace:: ``bytearray``
+.. _bytearray: https://docs.python.org/3/library/stdtypes.html#bytearray
+
+This library provides a simple and lightweight data structure for representing `Bloom filters <https://en.wikipedia.org/wiki/Bloom_filter>`__ that is derived from the built-in |bytearray|_ type. The data structure has methods for the insertion, membership, union, and subset operations. In addition, methods for estimating capacity and for converting to and from Base64 strings are available.
 
 Installation and Usage
 ----------------------
@@ -39,12 +43,15 @@ The library can be imported in the usual ways::
 
 Examples
 ^^^^^^^^
-This library makes it possible to concisely create, populate, and query simple Bloom filters. The example below constructs a Bloom filter that is 32 bits (*i.e.*, four bytes) in size::
+This library makes it possible to concisely create, populate, and query simple `Bloom filters <https://en.wikipedia.org/wiki/Bloom_filter>`__. The example below constructs a Bloom filter that is 32 bits (*i.e.*, four bytes) in size::
 
     >>> from blooms import blooms
     >>> b = blooms(4)
 
-It is the responsibility of the user of the library to hash and truncate the bytes-like object being inserted so that only those bytes that contribute to the object's membership are considered::
+.. |insertion_operator| replace:: insertion operator ``@=``
+.. _insertion_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__imatmul__
+
+A bytes-like object can be inserted into an instance using the |insertion_operator|_. It is the responsibility of the user of the library to hash and truncate the bytes-like object being inserted. Only the bytes that remain after truncation contribute to the membership of the bytes-like object within the Bloom filter::
 
     >>> from hashlib import sha256
     >>> x = 'abc' # Value to insert.
@@ -54,14 +61,18 @@ It is the responsibility of the user of the library to hash and truncate the byt
     >>> b.hex()
     '00000004'
 
-When testing whether a bytes-like object is a member of an instance, the same hashing and truncation operations should be applied::
+.. |membership_operator| replace:: membership operator ``@``
+.. _membership_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__rmatmul__
+
+When testing whether a bytes-like object is a member using the |membership_operator|_ of an instance, the same hashing and truncation operations should be applied::
 
     >>> sha256('abc'.encode()).digest()[:2] @ b
     True
     >>> sha256('xyz'.encode()).digest()[:2] @ b
     False
 
-The ``@=`` operator also accepts iterable containers::
+
+The |insertion_operator|_ also accepts iterable containers::
 
     >>> x = sha256('x'.encode()).digest()[:2]
     >>> y = sha256('y'.encode()).digest()[:2]
@@ -70,7 +81,10 @@ The ``@=`` operator also accepts iterable containers::
     >>> b.hex()
     '02200006'
 
-The union of two Bloom filters (both having the same size) can be computed using the built-in ``|`` operator::
+.. |union_operator| replace:: built-in ``|`` operator
+.. _union_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__or__
+
+The union of two Bloom filters (both having the same size) can be computed via the |union_operator|_::
 
     >>> c = blooms(4)
     >>> c @= sha256('xyz'.encode()).digest()[:2]
@@ -80,27 +94,36 @@ The union of two Bloom filters (both having the same size) can be computed using
     >>> sha256('xyz'.encode()).digest()[:2] @ d
     True
 
-It is also possible to check whether the members of one Bloom filter are a subset of the members of another Bloom filter::
+It is also possible to check whether the members of one Bloom filter `are a subset <https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.issubset>`__ of the members of another Bloom filter::
 
     >>> b.issubset(c)
     False
     >>> b.issubset(d)
     True
 
-A method is provided for determining the saturation of a Bloom filter. The saturation is a ``float`` value (between ``0.0`` and ``1.0``) that represents an upper bound on the rate with which false positives will occur when testing bytes-like objects (of a specific length) for membership within the Bloom filter::
+.. |saturation| replace:: ``saturation``
+.. _saturation: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.saturation
 
-	>>> b = blooms(32)
-	>>> from secrets import token_bytes
-	>>> for _ in range(8):
-	...     b @= token_bytes(4)
-	>>> b.saturation(4)
-	0.03125
+.. |float| replace:: ``float``
+.. _float: https://docs.python.org/3/library/functions.html#float
 
-It is also possible to determine the approximate maximum capacity of a Bloom filter for a given saturation limit. For example, the output below indicates that a saturation of ``0.05`` will likely be reached after more than ``28`` insertions of bytes-like objects of length ``8``::
+The |saturation|_ method calculates the saturation of a Bloom filter. The *saturation* is a |float|_ value (between ``0.0`` and ``1.0``) that represents an upper bound on the rate with which false positives will occur when testing bytes-like objects (of a specific length) for membership within the Bloom filter::
 
-	>>> b = blooms(32)
-	>>> b.capacity(8, 0.05)
-	28
+    >>> b = blooms(32)
+    >>> from secrets import token_bytes
+    >>> for _ in range(8):
+    ...     b @= token_bytes(4)
+    >>> b.saturation(4)
+    0.03125
+
+.. |capacity| replace:: ``capacity``
+.. _capacity: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.capacity
+
+It is also possible to determine the approximate maximum capacity of a Bloom filter for a given saturation limit using the |capacity|_ method. For example, the output below indicates that a saturation of ``0.05`` will likely be reached after more than ``28`` insertions of bytes-like objects of length ``8``::
+
+    >>> b = blooms(32)
+    >>> b.capacity(8, 0.05)
+    28
 
 In addition, conversion methods to and from Base64 strings are included to support concise encoding and decoding::
 
@@ -109,7 +132,10 @@ In addition, conversion methods to and from Base64 strings are included to suppo
     >>> sha256('abc'.encode()).digest()[:2] @ blooms.from_base64('AiAABg==')
     True
 
-If it is preferable to have a Bloom filter data structure that encapsulates a particular serialization, hashing, and truncation scheme, the recommended approach is to defined a derived class. The ``specialize`` method makes it possible to do so in a concise way::
+.. |specialize| replace:: ``specialize``
+.. _specialize: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.specialize
+
+If it is preferable to have a Bloom filter data structure that encapsulates a particular serialization, hashing, and truncation scheme, the recommended approach is to define a derived class. The |specialize|_ method makes it possible to do so in a concise way::
 
     >>> encode = lambda x: sha256(x).digest()[:2]
     >>> blooms_custom = blooms.specialize(name='blooms_custom', encode=encode)
@@ -118,7 +144,13 @@ If it is preferable to have a Bloom filter data structure that encapsulates a pa
     >>> bytes([1, 2, 3]) @ b
     True
 
-The user of the library is responsible for ensuring that Base64-encoded Bloom filters are converted back into an an instance of the appropriate derived class.
+.. |from_base64| replace:: ``from_base64``
+.. _from_base64: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.from_base64
+
+The user of the library is responsible for ensuring that Base64-encoded Bloom filters are converted back into an an instance of the appropriate derived class by using the |from_base64|_ method that belongs to that derived class::
+
+    >>> isinstance(blooms_custom.from_base64(b.to_base64()), blooms_custom)
+    True
 
 Development
 -----------
