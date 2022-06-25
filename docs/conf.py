@@ -25,8 +25,15 @@ with open('../pyproject.toml') as pyproject_file:
 project = pyproject_data['project']['name']
 version = pyproject_data['project']['version']
 release = version
-author = pyproject_data['project']['authors'][0]['name']
-copyright = '2021, ' + author # Period omitted; precedes punctuation in HTML.
+
+# The copyright year and holder information is retrieved from the
+# ``LICENSE`` file.
+import re
+with open('../LICENSE', 'r') as license_file:
+    license_string = license_file.read().split('Copyright (c) ')[1]
+year = license_string[:4]
+author = license_string[5:].split('\n')[0]
+copyright = year + ', ' + re.sub(r"\.$", "", author) # Period already in HTML.
 
 
 # -- General configuration ---------------------------------------------------

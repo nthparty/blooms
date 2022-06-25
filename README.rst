@@ -180,7 +180,7 @@ The subset of the unit tests included in the module itself and can be executed u
 Style conventions are enforced using `Pylint <https://www.pylint.org>`__::
 
     python -m pip install .[lint]
-    python -m pylint blooms ./test/test_blooms.py
+    python -m pylint src/blooms test/test_blooms.py
 
 Contributions
 ^^^^^^^^^^^^^
@@ -198,7 +198,7 @@ This library can be published as a `package on PyPI <https://pypi.org/project/bl
 
 Remove any old build/distribution files and package the source into a distribution archive::
 
-    rm -rf build dist *.egg-info
+    rm -rf build dist src/*.egg-info
     python -m build --sdist --wheel .
 
 Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__ using the `twine <https://pypi.org/project/twine>`__ package::
