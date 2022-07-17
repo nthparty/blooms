@@ -160,8 +160,8 @@ class blooms(bytearray):
         False
         """
         argument = (
-            getattr(type(self), '_encode')(argument) \
-            if hasattr(self, '_encode') else \
+            getattr(type(self), '_encode')(argument)
+            if hasattr(self, '_encode') else
             argument
         )
         for i in range(0, len(argument), 4):
@@ -279,15 +279,15 @@ class blooms(bytearray):
 
         # The numerator represents an upper bound on the number of insertions
         # that may have occurred to obtain the bit pattern in this instance.
-        numerator = sum(bin(b).count("1") for b in self) ** (exp_div + exp_mod)
+        numerator = sum(bin(b).count('1') for b in self) ** (exp_div + exp_mod)
 
         # The denominator represents the total number of possible combinations
         # of bits that can be set to ``1`` when an insertion occurs.
         denominator = (
             # Each bit obtained from the bytes-like object being inserted
             # can appear in any of the bit positions within this instance.
-            ((8 * len(self)) ** exp_div) \
-            * \
+            ((8 * len(self)) ** exp_div)
+            *
             # Include additional factor in case there are bytes that do not
             # form a complete 32-bit integer, but still contribute another bit
             # when performing an insertion. Using the :obj:`min` operator, we
@@ -341,13 +341,13 @@ class blooms(bytearray):
         # the numerator and then derive a worst-case capacity bound from the number
         # of non-zero bits (as represented by the numerator).
         denominator = (
-            ((8 * len(self)) ** exp_div) \
-            * \
+            ((8 * len(self)) ** exp_div)
+            *
             (min(8 * len(self), max(256, len(self) ** 2) * (length % 4)) ** exp_mod)
         )
         return int(
-            ((saturation * denominator) ** (1 / (exp_div + exp_mod))) \
-            / \
+            ((saturation * denominator) ** (1 / (exp_div + exp_mod)))
+            /
             ((length // 4) + exp_mod)
         )
 
@@ -367,5 +367,5 @@ class blooms(bytearray):
         """
         return type(name, (blooms,), {'_encode': encode})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     doctest.testmod() # pragma: no cover

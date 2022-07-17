@@ -13,10 +13,11 @@ def randbytes(n: int) -> bytes:
     Get pseudorandom bytes-like object of specified size using
     in a manner that is compatible across Python versions.
     """
-    return \
-        random.randbytes(n) \
-        if hasattr(random, 'randbytes') else \
+    return (
+        random.randbytes(n)
+        if hasattr(random, 'randbytes') else
         bytes(random.getrandbits(8) for _ in range(n))
+    )
 
 def saturation_from_data(b: blooms, length: int) -> float:
     """
@@ -82,10 +83,10 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
         # Add the method to the container class.
         setattr(
             Test_blooms_methods,
-            "_".join([
-                "test_saturation",
-                "blooms_len", str(blooms_length),
-                "item_len", str(item_length)
+            '_'.join([
+                'test_saturation',
+                'blooms_len', str(blooms_length),
+                'item_len', str(item_length)
             ]),
             method_for_saturation_test
         )
@@ -129,10 +130,10 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
         # Add the method to the container class.
         setattr(
             Test_blooms_methods,
-            "_".join([
-                "test_capacity",
-                "blooms_len", str(blooms_length),
-                "item_len", str(item_length)
+            '_'.join([
+                'test_capacity',
+                'blooms_len', str(blooms_length),
+                'item_len', str(item_length)
             ]),
             method_for_capacity_test
         )
