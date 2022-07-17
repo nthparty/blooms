@@ -49,7 +49,7 @@ This library makes it possible to concisely create, populate, and query simple `
     >>> b = blooms(4)
 
 .. |insertion_operator| replace:: insertion operator ``@=``
-.. _insertion_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__imatmul__
+.. _insertion_operator: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.__imatmul__
 
 A bytes-like object can be inserted into an instance using the |insertion_operator|_. It is the responsibility of the user of the library to hash and truncate the bytes-like object being inserted. Only the bytes that remain after truncation contribute to the membership of the bytes-like object within the Bloom filter::
 
@@ -62,7 +62,7 @@ A bytes-like object can be inserted into an instance using the |insertion_operat
     '00000004'
 
 .. |membership_operator| replace:: membership operator ``@``
-.. _membership_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__rmatmul__
+.. _membership_operator: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.__rmatmul__
 
 When testing whether a bytes-like object is a member using the |membership_operator|_ of an instance, the same hashing and truncation operations should be applied::
 
@@ -82,7 +82,7 @@ The |insertion_operator|_ also accepts iterable containers::
     '02200006'
 
 .. |union_operator| replace:: built-in ``|`` operator
-.. _union_operator: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.__or__
+.. _union_operator: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.__or__
 
 The union of two Bloom filters (both having the same size) can be computed via the |union_operator|_::
 
@@ -94,7 +94,7 @@ The union of two Bloom filters (both having the same size) can be computed via t
     >>> sha256('xyz'.encode()).digest()[:2] @ d
     True
 
-It is also possible to check whether the members of one Bloom filter `are a subset <https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.issubset>`__ of the members of another Bloom filter::
+It is also possible to check whether the members of one Bloom filter `are a subset <https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.issubset>`__ of the members of another Bloom filter::
 
     >>> b.issubset(c)
     False
@@ -102,7 +102,7 @@ It is also possible to check whether the members of one Bloom filter `are a subs
     True
 
 .. |saturation| replace:: ``saturation``
-.. _saturation: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.saturation
+.. _saturation: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.saturation
 
 .. |float| replace:: ``float``
 .. _float: https://docs.python.org/3/library/functions.html#float
@@ -117,7 +117,7 @@ The |saturation|_ method calculates the saturation of a Bloom filter. The *satur
     0.03125
 
 .. |capacity| replace:: ``capacity``
-.. _capacity: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.capacity
+.. _capacity: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.capacity
 
 It is also possible to determine the approximate maximum capacity of a Bloom filter for a given saturation limit using the |capacity|_ method. For example, the output below indicates that a saturation of ``0.05`` will likely be reached after more than ``28`` insertions of bytes-like objects of length ``8``::
 
@@ -133,7 +133,7 @@ In addition, conversion methods to and from Base64 strings are included to suppo
     True
 
 .. |specialize| replace:: ``specialize``
-.. _specialize: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.specialize
+.. _specialize: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.specialize
 
 If it is preferable to have a Bloom filter data structure that encapsulates a particular serialization, hashing, and truncation scheme, the recommended approach is to define a derived class. The |specialize|_ method makes it possible to do so in a concise way::
 
@@ -145,7 +145,7 @@ If it is preferable to have a Bloom filter data structure that encapsulates a pa
     True
 
 .. |from_base64| replace:: ``from_base64``
-.. _from_base64: https://blooms.readthedocs.io/en/latest/_source/blooms.html#blooms.blooms.blooms.from_base64
+.. _from_base64: https://blooms.readthedocs.io/en/1.1.0/_source/blooms.html#blooms.blooms.blooms.from_base64
 
 The user of the library is responsible for ensuring that Base64-encoded Bloom filters are converted back into an an instance of the appropriate derived class by using the |from_base64|_ method that belongs to that derived class::
 
@@ -177,7 +177,7 @@ The subset of the unit tests included in the module itself and can be executed u
 
     python src/blooms/blooms.py -v
 
-Style conventions are enforced using `Pylint <https://www.pylint.org>`__::
+Style conventions are enforced using `Pylint <https://pylint.pycqa.org>`__::
 
     python -m pip install .[lint]
     python -m pylint src/blooms test/test_blooms.py
@@ -196,11 +196,16 @@ This library can be published as a `package on PyPI <https://pypi.org/project/bl
 
     python -m pip install .[publish]
 
-Remove any old build/distribution files and package the source into a distribution archive::
+Ensure that the correct version number appears in ``pyproject.toml``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number)::
+
+    git tag ?.?.?
+    git push origin ?.?.?
+
+Remove any old build/distribution files. Then, package the source into a distribution archive::
 
     rm -rf build dist src/*.egg-info
     python -m build --sdist --wheel .
 
-Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__ using the `twine <https://pypi.org/project/twine>`__ package::
+Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__::
 
     python -m twine upload dist/*
