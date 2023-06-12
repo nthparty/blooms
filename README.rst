@@ -177,7 +177,7 @@ The subset of the unit tests included in the module itself and can be executed u
 
     python src/blooms/blooms.py -v
 
-Style conventions are enforced using `Pylint <https://pylint.pycqa.org>`__::
+Style conventions are enforced using `Pylint <https://pylint.readthedocs.io>`__::
 
     python -m pip install .[lint]
     python -m pylint src/blooms test/test_blooms.py

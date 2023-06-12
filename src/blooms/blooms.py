@@ -3,9 +3,9 @@ Lightweight Bloom filter data structure derived from the built-in
 :obj:`bytearray` type.
 """
 from __future__ import annotations
-from typing import Union, Callable
+from typing import Union, Callable, Iterable
 import doctest
-from collections.abc import Iterable
+import collections.abc
 import base64
 
 class blooms(bytearray):
@@ -133,7 +133,7 @@ class blooms(bytearray):
         >>> bytes() @ b
         True
         """
-        if not isinstance(argument, (bytes, bytearray, Iterable)):
+        if not isinstance(argument, (bytes, bytearray, collections.abc.Iterable)):
             raise TypeError(
                 'supplied argument is not a bytes-like object and not iterable'
             )
