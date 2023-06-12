@@ -1,6 +1,6 @@
 [project]
 name = "blooms"
-version = "1.1.0"
+version = "1.2.0"
 description = "Lightweight Bloom filter data structure derived from the built-in bytearray type."
 license = {text = "MIT"}
 authors = [
