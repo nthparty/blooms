@@ -1,9 +1,14 @@
 name: build-publish-sign-release
 on:
-  push
+  workflow_run:
+    workflows: ["lint-test-cover-docs"]
+    branches: [main]
+    types:
+    - completed
 jobs:
   build:
     name: Build package.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
