@@ -5,7 +5,7 @@ on:
       - '*'
 jobs:
   call-workflow-lint-test-cover-docs:
-    name: Lint, test (measuring coverage), and generate documentation.
+    name: Call linting/testing workflow.
     uses: ./.github/workflows/lint-test-cover-docs.yml
     secrets: inherit
   build:
