@@ -73,8 +73,7 @@ class blooms(bytearray):
 
     def __init__(self, *args, **kwargs):
         """
-        Create and initialize a new :obj:`blooms` instance. An instance can be of any
-        non-zero length.
+        Create and initialize a new :obj:`blooms` instance.
 
         >>> b = blooms(1)
         >>> b @= bytes([0])
@@ -83,8 +82,18 @@ class blooms(bytearray):
         >>> bytes([1]) @ b
         False
 
-        This method checks that the instance has a valid size before permitting its
-        creation.
+        Any approach for creating an instance of the built-in :obj:`bytearray` class
+        can also be used to create an instance of this class.
+
+        >>> b = blooms(range(256))
+        >>> bytes([1]) @ b
+        False
+        >>> b = blooms(b'abc')
+        >>> bytes([0]) @ b
+        True
+
+        An instance can be of any non-zero length. This method checks that the instance
+        has a valid size.
 
         >>> b = blooms()
         Traceback (most recent call last):
