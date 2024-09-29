@@ -68,6 +68,9 @@ class blooms(bytearray):
     >>> b.capacity(8, 0.05)
     28
     """
+    LENGTH_MAX: int = 256 ** 4
+    """Maximum permitted length for an instance."""
+
     def __init__(self, *args, **kwargs):
         """
         Create and initialize a new :obj:`blooms` instance. An instance can be of any
@@ -91,7 +94,7 @@ class blooms(bytearray):
         Traceback (most recent call last):
           ...
         ValueError: instance must have an integer length greater than zero
-        >>> b = blooms(256**4 + 1)
+        >>> b = blooms(256 ** 4 + 1)
         Traceback (most recent call last):
           ...
         ValueError: instance length cannot exceed 4294967296
@@ -101,8 +104,8 @@ class blooms(bytearray):
         if len(self) == 0:
             raise ValueError('instance must have an integer length greater than zero')
 
-        if len(self) >= 256 ** 4 + 1:
-            raise ValueError('instance length cannot exceed ' + str(256 ** 4))
+        if len(self) >= self.LENGTH_MAX + 1:
+            raise ValueError('instance length cannot exceed ' + str(self.LENGTH_MAX))
 
     def __imatmul__(
             self: blooms,
