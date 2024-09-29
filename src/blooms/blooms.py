@@ -102,7 +102,7 @@ class blooms(bytearray):
             raise ValueError('instance must have an integer length greater than zero')
 
         if len(self) >= 256 ** 4 + 1:
-            raise ValueError('instance length cannot exceed 4294967296')
+            raise ValueError('instance length cannot exceed ' + str(256 ** 4))
 
     def __imatmul__(
             self: blooms,
@@ -129,15 +129,28 @@ class blooms(bytearray):
         >>> b @= 123
         Traceback (most recent call last):
           ...
-        TypeError: supplied argument is not a bytes-like object and not iterable
+        TypeError: supplied argument must be a bytes-like object or an iterable
+        >>> b @= [bytes([4, 5, 6]), 123]
+        Traceback (most recent call last):
+          ...
+        TypeError: item in supplied iterable must be a bytes-like object
+
+        Note that when an iterable is supplied, the effects of all successful insertions
+        (that occurred before the exception) remain.
+
+        >>> bytes([4, 5, 6]) @ b
+        True
         """
         if not isinstance(argument, (bytes, bytearray, collections.abc.Iterable)):
             raise TypeError(
-                'supplied argument is not a bytes-like object and not iterable'
+                'supplied argument must be a bytes-like object or an iterable'
             )
 
         bss = [argument] if isinstance(argument, (bytes, bytearray)) else iter(argument)
         for bs in bss:
+            if not isinstance(bs, (bytes, bytearray)):
+                raise TypeError('item in supplied iterable must be a bytes-like object')
+
             bs = getattr(type(self), '_encode')(bs) if hasattr(self, '_encode') else bs
             for i in range(0, len(bs), 4):
                 index = int.from_bytes(bs[i:i + 4], 'little')
@@ -175,7 +188,18 @@ class blooms(bytearray):
         >>> b = blooms(1)
         >>> bytes() @ b
         True
+
+        If the supplied argument is not a bytes-like object, an exception is
+        raised.
+
+        >>> 123 @ b
+        Traceback (most recent call last):
+          ...
+        TypeError: supplied argument must be a bytes-like object
         """
+        if not isinstance(argument, (bytes, bytearray)):
+            raise TypeError('supplied argument must be a bytes-like object')
+
         argument = (
             getattr(type(self), '_encode')(argument)
             if hasattr(self, '_encode') else
@@ -216,10 +240,17 @@ class blooms(bytearray):
         >>> b0 | b1
         Traceback (most recent call last):
           ...
-        ValueError: instances do not have equivalent lengths
+        ValueError: instances must have equivalent lengths
+        >>> b0 | 123
+        Traceback (most recent call last):
+          ...
+        TypeError: supplied argument must be a blooms instance
         """
+        if not isinstance(other, blooms):
+            raise TypeError('supplied argument must be a blooms instance')
+
         if len(self) != len(other):
-            raise ValueError('instances do not have equivalent lengths')
+            raise ValueError('instances must have equivalent lengths')
 
         return blooms([s | o for (s, o) in zip(self, other)])
 
@@ -251,10 +282,17 @@ class blooms(bytearray):
         >>> b0.issubset(b1)
         Traceback (most recent call last):
           ...
-        ValueError: instances do not have equivalent lengths
+        ValueError: instances must have equivalent lengths
+        >>> b0.issubset(123)
+        Traceback (most recent call last):
+          ...
+        TypeError: supplied argument must be a blooms instance
         """
+        if not isinstance(other, blooms):
+            raise TypeError('supplied argument must be a blooms instance')
+
         if len(self) != len(other):
-            raise ValueError('instances do not have equivalent lengths')
+            raise ValueError('instances must have equivalent lengths')
 
         return all(x <= y for (x, y) in zip(self, other))
 
@@ -274,7 +312,17 @@ class blooms(bytearray):
         True
         >>> bytes([4, 5, 6]) @ b
         False
+
+        If a non-string input is supplied, an exception is raised.
+
+        >>> blooms.from_base64(123)
+        Traceback (most recent call last):
+          ...
+        TypeError: supplied argument must be a string
         """
+        if not isinstance(s, str):
+            raise TypeError('supplied argument must be a string')
+
         ba = bytearray.__new__(cls)
         ba.extend(base64.standard_b64decode(s))
         return ba
@@ -308,11 +356,25 @@ class blooms(bytearray):
         ...     b @= token_bytes(4)
         >>> b.saturation(4) < 0.1
         True
+        >>> b.saturation(-1)
+        Traceback (most recent call last):
+          ...
+        ValueError: length must be nonnegative
+        >>> b.saturation('abc')
+        Traceback (most recent call last):
+          ...
+        TypeError: length must be an integer
 
         The saturation of an instance can be interpreted as an upper bound on
         the rate at which false positives can be expected when querying the
         instance with bytes-like objects that have the specified length.
         """
+        if not isinstance(length, int):
+            raise TypeError('length must be an integer')
+
+        if length < 0:
+            raise ValueError('length must be nonnegative')
+
         # This implementation converts into a 32-bit integer each subsequence of
         # four bytes within a bytes-like object being inserted. Thus, each four-byte
         # portion contributes to one bit position in an instance. The terms below
@@ -357,6 +419,22 @@ class blooms(bytearray):
         28
         >>> b.capacity(12, 0.05)
         31
+        >>> b.capacity(-1, 0)
+        Traceback (most recent call last):
+          ...
+        ValueError: length must be nonnegative
+        >>> b.capacity('abc', 0)
+        Traceback (most recent call last):
+          ...
+        TypeError: length must be an integer
+        >>> b.capacity(0, -1)
+        Traceback (most recent call last):
+          ...
+        ValueError: saturation must be nonnegative
+        >>> b.capacity(0, 'abc')
+        Traceback (most recent call last):
+          ...
+        TypeError: saturation must be an integer or a floating-point number
 
         The capacity of an instance is not bounded for a saturation of ``1.0`` or
         for bytes-like objects of length zero.
@@ -371,6 +449,18 @@ class blooms(bytearray):
         track of the number of bytes-like objects that have been inserted into an
         instance.
         """
+        if not isinstance(length, int):
+            raise TypeError('length must be an integer')
+
+        if length < 0:
+            raise ValueError('length must be nonnegative')
+
+        if not isinstance(saturation, (int, float)):
+            raise TypeError('saturation must be an integer or a floating-point number')
+
+        if saturation < 0:
+            raise ValueError('saturation must be nonnegative')
+
         # Special cases are handled separately, ensuring there are no outliers among
         # the outputs (in terms of accuracy) over the range of these special cases.
         if length == 0 or saturation >= 1.0:
