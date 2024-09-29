@@ -51,22 +51,22 @@ class blooms(bytearray):
     occur when testing bytes-like objects (of the specified length) for membership
     within the instance.
 
-	>>> b = blooms(32)
-	>>> from secrets import token_bytes
-	>>> for _ in range(8):
-	...     b @= token_bytes(4)
-	>>> b.saturation(4) < 0.1
-	True
+    >>> b = blooms(32)
+    >>> from secrets import token_bytes
+    >>> for _ in range(8):
+    ...     b @= token_bytes(4)
+    >>> b.saturation(4) < 0.1
+    True
 
     It is also possible to use the :obj:`~blooms.capacity` method to obtain an
     approximate maximum capacity of a :obj:`blooms` instance for a given saturation
     limit. For example, the output below indicates that a saturation of ``0.05`` will
     likely be reached after more than ``28`` insertions of bytes-like objects of length
-    ``8``::
+    ``8``.
 
-	>>> b = blooms(32)
-	>>> b.capacity(8, 0.05)
-	28
+    >>> b = blooms(32)
+    >>> b.capacity(8, 0.05)
+    28
     """
     def __init__(self, *args, **kwargs):
         """
@@ -104,34 +104,32 @@ class blooms(bytearray):
         if len(self) >= 256 ** 4 + 1:
             raise ValueError('instance length cannot exceed 4294967296')
 
-    def __imatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> blooms:
+    def __imatmul__(
+            self: blooms,
+            argument: Union[bytes, bytearray, Iterable[Union[bytes, bytearray]]]
+        ) -> blooms:
         """
         Insert a bytes-like object (or an iterable of bytes-like objects)
         into this instance.
+
+        :param argument: Object or objects to insert into this instance.
+
+        This method provides a concise way to insert objects into an instance.
+        This method modifies the instance for which it is invoked.
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
         >>> b = blooms(100)
         >>> b @= (bytes([i, i + 1, i + 2]) for i in range(10))
         >>> b = blooms(100)
+
+        Any attempt to insert an object that has an unsupported type raises an
+        exception.
+
         >>> b @= 123
         Traceback (most recent call last):
           ...
         TypeError: supplied argument is not a bytes-like object and not iterable
-
-        A :obj:`blooms` instance never returns a false negative when queried, but
-        may return a false positive.
-
-        >>> b = blooms(1)
-        >>> b @= bytes([0])
-        >>> bytes([8]) @ b
-        True
-
-        The bytes-like object of length zero is a member of every :obj:`blooms` instance.
-
-        >>> b = blooms(1)
-        >>> bytes() @ b
-        True
         """
         if not isinstance(argument, (bytes, bytearray, collections.abc.Iterable)):
             raise TypeError(
@@ -148,9 +146,17 @@ class blooms(bytearray):
 
         return self
 
-    def __rmatmul__(self: blooms, argument: Union[bytes, bytearray, Iterable]) -> bool:
+    def __rmatmul__(
+            self: blooms,
+            argument: Union[bytes, bytearray]
+        ) -> bool:
         """
         Check whether a bytes-like object appears in this instance.
+
+        :param argument: Object to be used in querying this instance.
+
+        A :obj:`blooms` instance never returns a false negative when queried
+        using this method, but may return a false positive.
 
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
@@ -158,22 +164,40 @@ class blooms(bytearray):
         True
         >>> bytes([4, 5, 6]) @ b
         False
+        >>> b = blooms(1)
+        >>> b @= bytes([0])
+        >>> bytes([8]) @ b
+        True
+
+        The bytes-like object of length zero is a member of every :obj:`blooms`
+        instance.
+
+        >>> b = blooms(1)
+        >>> bytes() @ b
+        True
         """
         argument = (
             getattr(type(self), '_encode')(argument)
             if hasattr(self, '_encode') else
             argument
         )
+
         for i in range(0, len(argument), 4):
             index = int.from_bytes(argument[i:i + 4], 'little')
             (index_byte, index_bit) = (index // 8, index % 8)
             if ((self[index_byte % len(self)] >> index_bit) % 2) != 1:
                 return False
+
         return True
 
     def __or__(self: blooms, other: blooms) -> blooms:
         """
         Return the union of this instance and another instance.
+
+        :param other: Instance to use for the union operation.
+
+        This method creates a new :obj:`blooms` instance based on two existing
+        instances.
 
         >>> b0 = blooms(100)
         >>> b0 @= bytes([1, 2, 3])
@@ -185,6 +209,10 @@ class blooms(bytearray):
         True
         >>> b0 = blooms(100)
         >>> b1 = blooms(200)
+
+        This operation is only defined on instances that have equivalent
+        lengths.
+
         >>> b0 | b1
         Traceback (most recent call last):
           ...
@@ -197,12 +225,15 @@ class blooms(bytearray):
 
     def issubset(self: blooms, other: blooms) -> bool:
         """
-        Determine whether this instance represents a subset of
-        another instance. Note that the subset relationship being
-        checked is between the sets of all bytes-like objects that
-        are accepted by each instance, regardless of whether they
-        were explicitly inserted into an instance or not (*i.e.*,
-        all bytes-like objects that are false positives are
+        Determine whether this instance represents a subset of another
+        instance.
+
+        :param other: Instance for which to check the subset relationship.
+
+        Note that the subset relationship being checked is between the
+        sets of all bytes-like objects that are accepted by each instance,
+        regardless of whether they were explicitly inserted into an instance
+        or not (*i.e.*, all bytes-like objects that are false positives are
         considered to be members).
 
         >>> b0 = blooms([0, 0, 1])
@@ -211,6 +242,10 @@ class blooms(bytearray):
         True
         >>> b1.issubset(b0)
         False
+
+        This operation is only defined on instances that have equivalent
+        lengths.
+
         >>> b0 = blooms(100)
         >>> b1 = blooms(200)
         >>> b0.issubset(b1)
@@ -228,6 +263,10 @@ class blooms(bytearray):
         """
         Convert a Base64 UTF-8 string representation into an instance.
 
+        :param s: Base64 UTF-8 string representation of an instance.
+
+        This method creates a new instance based on the supplied string.
+
         >>> b = blooms(100)
         >>> b @= bytes([1, 2, 3])
         >>> b = blooms.from_base64(b.to_base64())
@@ -244,8 +283,7 @@ class blooms(bytearray):
         """
         Convert this instance to a Base64 UTF-8 string representation.
 
-        >>> b = blooms(100)
-        >>> isinstance(b.to_base64(), str)
+        >>> isinstance(blooms(100).to_base64(), str)
         True
         """
         return base64.standard_b64encode(self).decode('utf-8')
@@ -254,9 +292,13 @@ class blooms(bytearray):
         """
         Return the approximate saturation of this instance as a value between
         ``0.0`` and ``1.0`` (assuming that all bytes-like objects that have been
-        or will be inserted have the specified length). The approximation is an
-        upper bound on the true saturation, and its accuracy degrades as the
-        number of insertions approaches the value ``len(self) // 8``.
+        or will be inserted have the specified length).
+
+        :param length: Length of bytes-like objects in queries.
+
+        The approximation is an upper bound on the true saturation, and its
+        accuracy degrades as the number of insertions approaches the value
+        ``len(self) // 8``.
 
         >>> b = blooms(32)
         >>> b.saturation(4)
@@ -305,6 +347,11 @@ class blooms(bytearray):
         objects of the specified length that can be inserted into an empty version
         of this instance before the specified saturation is likely to be reached.
 
+        :param length: Length of bytes-like objects in queries.
+        :param saturation: Saturation with respect to which to estimate capacity.
+
+        This method is defined for nonnegative length and saturation values.
+
         >>> b = blooms(32)
         >>> b.capacity(8, 0.05)
         28
@@ -352,10 +399,19 @@ class blooms(bytearray):
         )
 
     @staticmethod
-    def specialize(name: str, encode: Callable) -> type:
+    def specialize(
+            name: str,
+            encode: Callable[[Union[bytes, bytearray]], Union[bytes, bytearray]]
+        ) -> type:
         """
         Return a class derived from :obj:`blooms` that uses
         the supplied encoding for members.
+
+        :param name: Name of derived class being defined.
+        :param encode: Custom encoding function that the derived class will use.
+
+        The supplied encoding function must accept one bytes-like object as an
+        input and must return a bytes-like object as an output.
 
         >>> from hashlib import sha256
         >>> encode = lambda x: sha256(x).digest()[:2]
