@@ -43,7 +43,11 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
     for item_length in itertools.chain(range(8), range(8, 64, 13)):
         # The saturation tests for this combination of lengths are encapsulated in the
         # methods below.
-        def method_for_saturation_test(test, blooms_len=blooms_length, item_len=item_length):
+        def method_for_saturation_test(
+                test: Test_blooms_methods,
+                blooms_len: int = blooms_length,
+                item_len: int = item_length
+            ):
             """
             Test the accuracy of the approximations returned by the method for
             calculating the saturation of an instance.
@@ -53,9 +57,9 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
             # number of insertions exceeds the number of distinct bytes-like objects of
             # the current length.
             for item_count in [
-                2**k
+                2 ** k
                 for k in range(2, blooms_len.bit_length() - 2)
-                if 2**k < 256**item_len
+                if 2 ** k < 256 ** item_len
             ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
@@ -93,7 +97,11 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
 
         # The capacity tests for this combination of lengths are encapsulated in the
         # methods below.
-        def method_for_capacity_test(test, blooms_len=blooms_length, item_len=item_length):
+        def method_for_capacity_test(
+                test: Test_blooms_methods,
+                blooms_len: int = blooms_length,
+                item_len: int = item_length
+            ):
             """
             Test the accuracy of the approximations returned by the method for
             calculating the capacity of an instance.
@@ -103,9 +111,9 @@ for blooms_length in [2 ** k for k in range(0, 21, 2)]:
             # number of insertions exceeds the number of distinct bytes-like objects of
             # the current length.
             for item_count in [
-                2**k
+                2 ** k
                 for k in range(2, blooms_len.bit_length() - 2)
-                if 2**k < 256**item_len
+                if 2 ** k < 256**item_len
             ]:
                 # Set the random seed at this point to ensure that tests are deterministic
                 # (and consistent regardless of the order in which they are executed).
